@@ -1,9 +1,10 @@
-import React from 'react';
 import { Easing, Animated } from 'react-native';
+import {createAppContainer} from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 
-import MainScreen from './src/screens/Main';
-import ShareScreen from './src/screens/Share';
+import MainScreen from 'pokemon_animation/src/screens/Main';
+import ShareScreen from 'pokemon_animation/src/screens/Share';
+import DetailsScreen from 'pokemon_animation/src/components/Details';
 
 const transitionConfig = () => {
   return {
@@ -35,7 +36,7 @@ const transitionConfig = () => {
   };
 };
 
-const RootStack = createStackNavigator(
+const MainStack = createStackNavigator(
   {
     Main: {
       screen: MainScreen,
@@ -50,4 +51,18 @@ const RootStack = createStackNavigator(
   }
 );
 
-export default RootStack;
+const RootStack = createStackNavigator({
+  Main:{
+    screen:MainStack,
+  },
+  Details:{
+    screen: DetailsScreen,
+  },
+},{
+  mode:'modal',
+  headerMode:'none',
+});
+
+const AppContainer = createAppContainer(RootStack);
+
+export default AppContainer;

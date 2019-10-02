@@ -41,30 +41,29 @@ export default class Main extends Component {
     this._nativeScrollY = new Animated.Value(
       Platform.OS === 'ios' ? -HEADER_MAX_HEIGHT : 0
     );
-
-    this.state = {
-      isModalVisible: false,
-    };
   }
 
   cardAction = () => {};
 
   viewAction = (pokemon, image) => {
-    this._pokemonStats = [];
+    this.props.navigation.navigate('Details',{
+      title:pokemon,
+      image:image,
+      data:this._getPokemonStats(),
+    });
+
+  };
+
+  _getPokemonStats=()=>{
+    const pokemonStatsData = [];
     pokemonStats.forEach(item => {
-      this._pokemonStats.push({
+      pokemonStatsData.push({
         label: item,
         value: getRandomInt(25, 150),
       });
     });
-
-    this.setState({
-      pokemon,
-      image,
-      stats: this._pokemonStats,
-      isModalVisible: true,
-    });
-  };
+    return pokemonStatsData;
+  }
 
   bookmarkAction = () => {};
 
@@ -72,14 +71,8 @@ export default class Main extends Component {
     this.props.navigation.navigate('Share');
   };
 
-  closeModal = () => {
-    this.setState({
-      isModalVisible: false,
-    });
-  };
 
   render() {
-    const { isModalVisible, image, stats, pokemon } = this.state;
     const nativeScrollY = Animated.add(
       this._nativeScrollY,
       Platform.OS === 'ios' ? HEADER_MAX_HEIGHT : 0
@@ -107,14 +100,6 @@ export default class Main extends Component {
             )}
           />
         )}
-
-        <AnimatedModal
-          title={'View Pokemon'}
-          visible={isModalVisible}
-          onClose={this.closeModal}
-        >
-          <BigCard title={pokemon} image={image} data={stats} />
-        </AnimatedModal>
       </View>
     );
   }
