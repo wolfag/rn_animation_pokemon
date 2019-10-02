@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { View, Animated, Platform } from 'react-native';
+import { View, Animated, Platform, UIManager, LayoutAnimation } from 'react-native';
 
 import pokemonMock from 'pokemon_animation/src/data/pokemon';
 import pokemonStats from 'pokemon_animation/src/data/pokemon-stats';
@@ -16,8 +16,23 @@ import AnimatedModal from 'pokemon_animation/src/components/AnimatedModal';
 import CardList from 'pokemon_animation/src/components/CardList';
 import AnimatedHeader from 'pokemon_animation/src/components/AnimatedHeader';
 
-import { getRandomInt } from 'pokemon_animation/src/lib/random';
+import { getRandomInt, shuffleArray } from 'pokemon_animation/src/lib/random';
 import { HEADER_MAX_HEIGHT } from 'pokemon_animation/src/settings/layout';
+
+if (Platform.OS === 'android'){
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const springAnimationProperties = {
+  type:LayoutAnimation.Types.spring,
+  springDamping:0.3,
+  property:LayoutAnimation.Properties.scaleXY,
+};
+
+const animationConfig = {
+  duration:500,
+  create:springAnimationProperties,
+};
 
 export default class Main extends Component {
   static navigationOptions = ({ navigation }) => {
@@ -41,6 +56,10 @@ export default class Main extends Component {
     this._nativeScrollY = new Animated.Value(
       Platform.OS === 'ios' ? -HEADER_MAX_HEIGHT : 0
     );
+
+    this.state = {
+      pokemon:pokemonMock,
+    };
   }
 
   cardAction = () => {};
@@ -51,7 +70,6 @@ export default class Main extends Component {
       image:image,
       data:this._getPokemonStats(),
     });
-
   };
 
   _getPokemonStats=()=>{
@@ -64,6 +82,14 @@ export default class Main extends Component {
     });
     return pokemonStatsData;
   }
+
+  _shuffleData = () => {
+    LayoutAnimation.configureNext(animationConfig);
+    let newArray = shuffleArray(this.state.pokemon);
+    this.setState({
+      pokemon: newArray,
+    });
+  };
 
   bookmarkAction = () => {};
 
@@ -78,12 +104,17 @@ export default class Main extends Component {
       Platform.OS === 'ios' ? HEADER_MAX_HEIGHT : 0
     );
 
+    const {pokemon} = this.state;
+
     return (
       <View style={styles.container}>
-        <AnimatedHeader title={'Poke-Gallery'} nativeScrollY={nativeScrollY} />
-        {this._nativeScrollY && (
+        <AnimatedHeader title={'Poke-Gallery'}
+          nativeScrollY={nativeScrollY}
+          onPress={this._shuffleData}
+        />
+        {this._nativeScrollY  && pokemon && (
           <CardList
-            data={pokemonMock}
+            data={pokemon}
             cardAction={this.cardAction}
             viewAction={this.viewAction}
             bookmarkAction={this.bookmarkAction}
